@@ -34,12 +34,13 @@ data "aws_iam_policy_document" "github_assume_role" {
     }
 
     condition {
-      test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:sub"
+        test = "StringEquals"
 
-      values = [
-        "repo:${var.github_owner}/${var.github_repository}:ref:refs/heads/${var.github_branch}"
-      ]
+        variable = "token.actions.githubusercontent.com:sub"
+
+        values = [
+            "repo:${var.github_owner}@${var.github_owner_id}/${var.github_repository}@${var.github_repository_id}:ref:refs/heads/${var.github_branch}"
+        ]
     }
   }
 }

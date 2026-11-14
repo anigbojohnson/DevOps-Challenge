@@ -110,4 +110,7 @@ module "github_oidc" {
 
   ecs_execution_role_arn = module.ecs.execution_role_arn
   ecs_task_role_arn      = module.ecs.ecs_task_role_arn
+
+  github_owner_id      = var.github_owner_id
+  github_repository_id = var.github_repository_id
 }

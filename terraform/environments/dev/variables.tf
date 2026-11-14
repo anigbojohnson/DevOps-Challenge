@@ -63,3 +63,13 @@ variable "github_branch" {
   type        = string
   default     = "main"
 }
+
+variable "github_owner_id" {
+  description = "GitHub account owner ID"
+  type        = string
+}
+
+variable "github_repository_id" {
+  description = "GitHub repository ID"
+  type        = string
+}

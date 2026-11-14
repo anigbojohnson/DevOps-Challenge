@@ -38,3 +38,11 @@ variable "ecs_task_role_arn" {
   description = "ECS task role ARN"
   type        = string
 }
+
+variable "github_owner_id" {
+  type = string
+}
+
+variable "github_repository_id" {
+  type = string
+}
