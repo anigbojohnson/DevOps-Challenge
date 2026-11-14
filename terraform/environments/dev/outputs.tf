@@ -42,3 +42,8 @@ output "certificate_validation_options" {
   description = "DNS records required to validate the ACM certificate"
   value       = module.load_balancer.certificate_validation_options
 }
+
+output "github_actions_role_arn" {
+  description = "IAM role ARN to configure in GitHub Actions"
+  value       = module.github_oidc.github_actions_role_arn
+}

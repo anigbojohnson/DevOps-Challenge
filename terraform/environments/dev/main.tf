@@ -94,3 +94,20 @@ module "monitoring" {
   load_balancer_arn_suffix = module.load_balancer.load_balancer_arn_suffix
   target_group_arn_suffix  = module.load_balancer.target_group_arn_suffix
 }
+
+
+module "github_oidc" {
+  source = "../../modules/github_oidc"
+
+  github_owner      = var.github_owner
+  github_repository = var.github_repository
+  github_branch     = var.github_branch
+
+  ecr_repository_arn = module.ecr.repository_arn
+
+  ecs_cluster_arn = module.ecs.cluster_arn
+  ecs_service_arn = module.ecs.service_arn
+
+  ecs_execution_role_arn = module.ecs.execution_role_arn
+  ecs_task_role_arn      = module.ecs.ecs_task_role_arn
+}

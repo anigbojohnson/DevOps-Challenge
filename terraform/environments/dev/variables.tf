@@ -47,3 +47,19 @@ variable "container_port" {
   type        = number
   default     = 3000
 }
+
+variable "github_owner" {
+  description = "GitHub repository owner"
+  type        = string
+}
+
+variable "github_repository" {
+  description = "GitHub repository name"
+  type        = string
+}
+
+variable "github_branch" {
+  description = "GitHub deployment branch"
+  type        = string
+  default     = "main"
+}
