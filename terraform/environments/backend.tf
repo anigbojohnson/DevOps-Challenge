@@ -1,0 +1,11 @@
+terraform {
+  backend "s3" {
+    bucket = "todo-list-1987"
+    key    = "state/dev/terraform.tfstate"
+    region = "eu-west-2"
+    encrypt = true
+    use_lockfile = true
+  }
+}
+
+

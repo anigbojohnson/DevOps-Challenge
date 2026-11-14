@@ -1,0 +1,221 @@
+name: Todo Application CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: todo-app-dev
+  ECS_CLUSTER: todo-app-dev-cluster
+  ECS_SERVICE: todo-app-dev-service
+
+jobs:
+
+  # ==================================
+  # BUILD AND TEST
+  # ==================================
+
+  build-and-test:
+    name: Build and Test Todo Application
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: todo_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d todo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: todo_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create test database schema
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost \
+            -U postgres \
+            -d todo_test \
+            -f database/schema.sql
+
+      - name: Run application tests
+        run: npm test
+
+      - name: Build Docker image
+        run: docker build -t todo-app:${{ github.sha }} .
+
+      - name: Save Docker image
+        run: docker save todo-app:${{ github.sha }} -o todo-app.tar
+
+      - name: Upload Docker image
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-app-image
+          path: todo-app.tar
+          retention-days: 1
+
+  # ==================================
+  # DEPLOY TO AWS ECS
+  # ==================================
+
+  deploy:
+    name: Deploy to Amazon ECS
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: todo-app-image
+
+      - name: Load Docker image
+        run: docker load -i todo-app.tar
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Tag Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker tag todo-app:${IMAGE_TAG} \
+            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+
+      - name: Push Docker image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+
+      # Retrieve the existing Terraform-managed task definition
+      - name: Retrieve current ECS task definition
+        env:
+          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ env.ECS_SERVICE }}
+        run: |
+          TASK_DEFINITION_ARN=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE" \
+            --query 'services[0].taskDefinition' \
+            --output text)
+
+          if [ -z "$TASK_DEFINITION_ARN" ] || [ "$TASK_DEFINITION_ARN" = "None" ]; then
+            echo "Could not retrieve the ECS task definition."
+            exit 1
+          fi
+
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_DEFINITION_ARN" \
+            --query 'taskDefinition' \
+            --output json > task-definition.json
+
+      # Replace only the application container image
+      - name: Update container image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+          jq --arg IMAGE "$IMAGE_URI" '
+            del(
+              .taskDefinitionArn,
+              .revision,
+              .status,
+              .requiresAttributes,
+              .compatibilities,
+              .registeredAt,
+              .registeredBy,
+              .deregisteredAt
+            )
+            |
+            .containerDefinitions |= map(
+              if .name == "todo-app"
+              then .image = $IMAGE
+              else .
+              end
+            )
+          ' task-definition.json > updated-task-definition.json
+
+      # Register a new revision in ECS
+      - name: Register new ECS task definition
+        id: register-task
+        run: |
+          TASK_DEFINITION_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://updated-task-definition.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "task_definition_arn=$TASK_DEFINITION_ARN" >> "$GITHUB_OUTPUT"
+
+      # Update the ECS service
+      - name: Deploy to Amazon ECS
+        env:
+          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ env.ECS_SERVICE }}
+          TASK_DEFINITION_ARN: ${{ steps.register-task.outputs.task_definition_arn }}
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --task-definition "$TASK_DEFINITION_ARN"
+
+          aws ecs wait services-stable \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE"
