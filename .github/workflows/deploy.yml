@@ -77,7 +77,7 @@ jobs:
           psql -h localhost \
             -U postgres \
             -d todo_test \
-            -f database/schema.sql
+            -f config/schema.sql
 
       - name: Run application tests
         run: npm test
