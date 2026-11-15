@@ -168,3 +168,4 @@ resource "aws_iam_role_policy" "github_deployment" {
   role   = aws_iam_role.github_actions.id
   policy = data.aws_iam_policy_document.deployment.json
 }
+
