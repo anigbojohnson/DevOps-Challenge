@@ -131,23 +131,23 @@ data "aws_iam_policy_document" "deployment" {
   }
   # Allow GitHub Actions to run database migrations
   statement {
-    sid    = "ECSRunMigrationTask"
-    effect = "Allow"
+  sid    = "ECSRunMigrationTask"
+  effect = "Allow"
 
-    actions = [
-      "ecs:RunTask"
-    ]
+  actions = [
+    "ecs:RunTask"
+  ]
 
-    resources = [
-      "${var.ecs_task_definition_arn}"
-    ]
+  resources = [
+    replace(var.ecs_task_definition_arn, "/:[0-9]+$/", ":*")
+  ]
 
-    condition {
-      test     = "ArnEquals"
-      variable = "ecs:cluster"
-      values   = [var.ecs_cluster_arn]
-    }
+  condition {
+    test     = "ArnEquals"
+    variable = "ecs:cluster"
+    values   = [var.ecs_cluster_arn]
   }
+}
 
   # Allow GitHub Actions to inspect migration tasks
   statement {
