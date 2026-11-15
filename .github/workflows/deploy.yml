@@ -227,7 +227,7 @@ jobs:
             --task-definition "$TASK_DEFINITION_ARN" \
             --launch-type FARGATE \
             --network-configuration file://network-config.json \
-            --overrides '{"containerOverrides":[{"name":"todo-app","command":["node","scripts/migrate.js"]}]}' \
+            --overrides '{"containerOverrides":[{"name":"todo-app","command":["node","src/scripts/migrate.js"]}]}' \
             --query 'tasks[0].taskArn' \
             --output text)
 
@@ -257,7 +257,7 @@ jobs:
 
           echo "Database migration completed successfully."
       # Update the ECS service
-      
+
       - name: Deploy to Amazon ECS
         env:
           ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
