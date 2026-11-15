@@ -46,3 +46,9 @@ variable "github_owner_id" {
 variable "github_repository_id" {
   type = string
 }
+
+
+variable "ecs_task_definition_arn" {
+  description = "ARN of the ECS task definition"
+  type        = string
+}

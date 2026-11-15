@@ -108,6 +108,7 @@ module "github_oidc" {
 
   ecs_cluster_arn = module.ecs.cluster_arn
   ecs_service_arn = module.ecs.service_arn
+  ecs_task_definition_arn = module.ecs.task_definition_arn
 
   ecs_execution_role_arn = module.ecs.execution_role_arn
   ecs_task_role_arn      = module.ecs.ecs_task_role_arn

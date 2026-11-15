@@ -17,7 +17,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 data "aws_iam_policy_document" "github_assume_role" {
   statement {
     effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity","ecs:RunTask", "ecs:DescribeTasks"]
+    actions = ["sts:AssumeRoleWithWebIdentity"]
 
     principals {
       type = "Federated"
@@ -56,6 +56,8 @@ resource "aws_iam_role" "github_actions" {
 
 # Permissions for pushing images and deploying to ECS
 data "aws_iam_policy_document" "deployment" {
+
+  
   # ECR authentication
   statement {
     sid    = "ECRAuthentication"
@@ -127,6 +129,38 @@ data "aws_iam_policy_document" "deployment" {
       values   = ["ecs-tasks.amazonaws.com"]
     }
   }
+  # Allow GitHub Actions to run database migrations
+  statement {
+    sid    = "ECSRunMigrationTask"
+    effect = "Allow"
+
+    actions = [
+      "ecs:RunTask"
+    ]
+
+    resources = [
+      "${var.ecs_task_definition_arn}"
+    ]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = [var.ecs_cluster_arn]
+    }
+  }
+
+  # Allow GitHub Actions to inspect migration tasks
+  statement {
+    sid    = "ECSDescribeMigrationTasks"
+    effect = "Allow"
+
+    actions = [
+      "ecs:DescribeTasks"
+    ]
+
+    resources = ["*"]
+  }
+
 }
 
 resource "aws_iam_role_policy" "github_deployment" {
