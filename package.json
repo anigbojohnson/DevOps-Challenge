@@ -6,7 +6,9 @@
 "scripts": {
     "start": "node src/server.js",
     "test": "jest --runInBand",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+     "migrate": "node scripts/migrate.js"
+
   },
   "keywords": [],
   "author": "",

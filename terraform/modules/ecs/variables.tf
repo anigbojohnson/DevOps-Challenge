@@ -40,9 +40,7 @@ variable "database_secret_arn" {
 variable "database_username"{
     type = string
 }
-variable "database_password" {
-  type = string
-}
+
 
 variable "target_group_arn" {
   type = string
@@ -51,4 +49,9 @@ variable "target_group_arn" {
 variable "desired_count" {
   type    = number
   default = 1
+}
+
+variable "log_group_name" {
+  description = "CloudWatch Log Group name for ECS application logs"
+  type        = string
 }

@@ -204,7 +204,60 @@ jobs:
 
           echo "task_definition_arn=$TASK_DEFINITION_ARN" >> "$GITHUB_OUTPUT"
 
+      
+      # Run database migration before deploying the application
+      - name: Run database migration
+        env:
+          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
+          TASK_DEFINITION_ARN: ${{ steps.register-task.outputs.task_definition_arn }}
+        run: |
+          # Get the ECS service network configuration
+          NETWORK_CONFIG=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE" \
+            --query 'services[0].networkConfiguration.awsvpcConfiguration' \
+            --output json)
+
+          jq -n --argjson config "$NETWORK_CONFIG" \
+            '{awsvpcConfiguration: $config}' > network-config.json
+
+          # Start a one-off migration task
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$ECS_CLUSTER" \
+            --task-definition "$TASK_DEFINITION_ARN" \
+            --launch-type FARGATE \
+            --network-configuration file://network-config.json \
+            --overrides '{"containerOverrides":[{"name":"todo-app","command":["node","scripts/migrate.js"]}]}' \
+            --query 'tasks[0].taskArn' \
+            --output text)
+
+          if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" = "None" ]; then
+            echo "Failed to start migration task."
+            exit 1
+          fi
+
+          echo "Migration task started: $TASK_ARN"
+
+          # Wait until migration task finishes
+          aws ecs wait tasks-stopped \
+            --cluster "$ECS_CLUSTER" \
+            --tasks "$TASK_ARN"
+
+          # Check migration exit code
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster "$ECS_CLUSTER" \
+            --tasks "$TASK_ARN" \
+            --query 'tasks[0].containers[?name==`todo-app`].exitCode | [0]' \
+            --output text)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Database migration failed. Exit code: $EXIT_CODE"
+            exit 1
+          fi
+
+          echo "Database migration completed successfully."
       # Update the ECS service
+      
       - name: Deploy to Amazon ECS
         env:
           ECS_CLUSTER: ${{ env.ECS_CLUSTER }}

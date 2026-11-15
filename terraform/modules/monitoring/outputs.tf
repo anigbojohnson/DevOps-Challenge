@@ -7,3 +7,8 @@ output "dashboard_arn" {
   description = "CloudWatch dashboard ARN"
   value       = aws_cloudwatch_dashboard.main.dashboard_arn
 }
+
+output "ecs_log_group_name" {
+  description = "CloudWatch Log Group for ECS application logs"
+  value       = aws_cloudwatch_log_group.ecs.name
+}

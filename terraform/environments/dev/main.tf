@@ -38,7 +38,6 @@ module "database" {
   subnet_ids        = module.networking.private_subnet_ids
   database_name     = var.database_name
   database_username = var.database_username
-  database_password = var.database_password
   security_group_id = module.security.database_security_group_id
 
   tags = local.common_tags
@@ -63,6 +62,8 @@ module "ecs" {
   aws_region     = var.aws_region
   repository_url = module.ecr.repository_url
 
+  log_group_name = module.monitoring.ecs_log_group_name
+
 
   subnet_ids        = module.networking.private_subnet_ids
   security_group_id = module.security.ecs_security_group_id
@@ -72,7 +73,6 @@ module "ecs" {
   database_endpoint   = module.database.database_endpoint
   database_name       = var.database_name
   database_username   = var.database_username
-  database_password   = var.database_password
   database_secret_arn = module.database.database_secret_arn
 
   target_group_arn = module.load_balancer.target_group_arn
@@ -82,6 +82,7 @@ module "ecs" {
 
 module "monitoring" {
   source = "../../modules/monitoring"
+
 
   name       = local.name
   aws_region = var.aws_region

@@ -36,11 +36,6 @@ variable "database_username" {
   sensitive   = true
 }
 
-variable "database_password" {
-  description = "PostgreSQL master password"
-  type        = string
-  sensitive   = true
-}
 
 variable "container_port" {
   description = "Node.js application port"

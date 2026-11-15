@@ -19,3 +19,4 @@ output "database_secret_arn" {
 output "database_instance_identifier" {
   value = aws_db_instance.postgres.id
 }
+

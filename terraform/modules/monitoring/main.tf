@@ -1,3 +1,14 @@
+# ECS logs
+resource "aws_cloudwatch_log_group" "ecs" {
+  name              = "/ecs/${var.name}"
+  retention_in_days = 30
+}
+
+# RDS logs
+resource "aws_cloudwatch_log_group" "rds" {
+  name              = "/aws/rds/instance/${var.database_instance_identifier}/postgresql"
+  retention_in_days = 30
+}
 
 # ECS CPU alarm
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
