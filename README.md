@@ -209,12 +209,34 @@ Defined in `.github/workflows/deploy.yml`. Triggers: push to `main`, pull reques
 
 4. Build the image: `docker build -t todo-app:${GITHUB_SHA} .` The image is passed to the deploy job as an artifact.
 5. Authenticate to AWS with OIDC. No long-lived access keys are stored in GitHub. The IAM trust policy is limited to this repository and branch.
-6. Push the image to `todo-app-dev` in ECR, tagged with the commit SHA.
+6. Push the image to the environment's ECR repository (`ECR_REPOSITORY`), tagged with the commit SHA.
 7. Register a new ECS task definition revision with the new image.
 8. Run a one-off Fargate task from that revision with the command `node scripts/migrate.js`. The workflow waits for it to stop and checks the exit code. A non-zero exit stops the deployment.
 9. Update the ECS service to the new task definition and wait for it to stabilise.
 
 Migrations always finish before the new application version goes live.
+
+### Environment variables
+
+The workflow's `env` block in `.github/workflows/deploy.yml` names the target environment. Update it when deploying to production:
+
+| Variable | Dev | Production |
+|---|---|---|
+| `AWS_REGION` | `us-east-1` | `us-east-1` |
+| `ECR_REPOSITORY` | `todo-app-dev` | `todo-app-production` |
+| `ECS_CLUSTER` | `todo-app-dev-cluster` | `todo-app-production-cluster` |
+| `ECS_SERVICE` | `todo-app-dev-service` | `todo-app-production-service` |
+
+```yaml
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: todo-app-production
+  ECS_CLUSTER: todo-app-production-cluster
+  ECS_SERVICE: todo-app-production-service
+```
+
+- The names must match what Terraform creates in `terraform/environments/production`. Confirm them with `terraform output`.
+- The `AWS_ROLE_ARN` secret must hold the production deployment role's ARN, and that role's trust policy must allow the branch that runs the workflow.
 
 ## Database migrations
 
