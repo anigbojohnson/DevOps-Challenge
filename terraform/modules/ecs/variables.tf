@@ -37,8 +37,8 @@ variable "database_secret_arn" {
   type        = string
 }
 
-variable "database_username"{
-    type = string
+variable "database_username" {
+  type = string
 }
 
 
@@ -55,3 +55,22 @@ variable "log_group_name" {
   description = "CloudWatch Log Group name for ECS application logs"
   type        = string
 }
+
+variable "min_capacity" {
+  description = "Minimum number of ECS tasks"
+  type        = number
+}
+
+variable "max_capacity" {
+  description = "Maximum number of ECS tasks"
+  type        = number
+}
+
+variable "task_cpu" {
+  type = number
+}
+
+variable "task_memory" {
+  type = number
+}
+

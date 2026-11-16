@@ -34,11 +34,15 @@ module "ecr" {
 module "database" {
   source = "../../modules/database"
 
+  multi_az          = false
   name              = local.name
   subnet_ids        = module.networking.private_subnet_ids
   database_name     = var.database_name
   database_username = var.database_username
   security_group_id = module.security.database_security_group_id
+
+  instance_class = "db.t4g.micro"
+
 
   tags = local.common_tags
 }
@@ -51,7 +55,7 @@ module "load_balancer" {
   subnet_ids        = module.networking.public_subnet_ids
   security_group_id = module.security.alb_security_group_id
   container_port    = var.container_port
-  domain_name       = "mytodo.dpdns.org"
+  domain_name       = var.domain_name
 
 }
 
@@ -61,6 +65,12 @@ module "ecs" {
   name           = local.name
   aws_region     = var.aws_region
   repository_url = module.ecr.repository_url
+
+  min_capacity = 1
+  max_capacity = 3
+
+  task_cpu    = 256
+  task_memory = 512
 
   log_group_name = module.monitoring.ecs_log_group_name
 
@@ -106,8 +116,8 @@ module "github_oidc" {
 
   ecr_repository_arn = module.ecr.repository_arn
 
-  ecs_cluster_arn = module.ecs.cluster_arn
-  ecs_service_arn = module.ecs.service_arn
+  ecs_cluster_arn         = module.ecs.cluster_arn
+  ecs_service_arn         = module.ecs.service_arn
   ecs_task_definition_arn = module.ecs.task_definition_arn
 
   ecs_execution_role_arn = module.ecs.execution_role_arn

@@ -34,13 +34,13 @@ data "aws_iam_policy_document" "github_assume_role" {
     }
 
     condition {
-        test = "StringEquals"
+      test = "StringEquals"
 
-        variable = "token.actions.githubusercontent.com:sub"
+      variable = "token.actions.githubusercontent.com:sub"
 
-        values = [
-            "repo:${var.github_owner}@${var.github_owner_id}/${var.github_repository}@${var.github_repository_id}:ref:refs/heads/${var.github_branch}"
-        ]
+      values = [
+        "repo:${var.github_owner}@${var.github_owner_id}/${var.github_repository}@${var.github_repository_id}:ref:refs/heads/${var.github_branch}"
+      ]
     }
   }
 }
@@ -57,7 +57,7 @@ resource "aws_iam_role" "github_actions" {
 # Permissions for pushing images and deploying to ECS
 data "aws_iam_policy_document" "deployment" {
 
-  
+
   # ECR authentication
   statement {
     sid    = "ECRAuthentication"
@@ -131,23 +131,23 @@ data "aws_iam_policy_document" "deployment" {
   }
   # Allow GitHub Actions to run database migrations
   statement {
-  sid    = "ECSRunMigrationTask"
-  effect = "Allow"
+    sid    = "ECSRunMigrationTask"
+    effect = "Allow"
 
-  actions = [
-    "ecs:RunTask"
-  ]
+    actions = [
+      "ecs:RunTask"
+    ]
 
-  resources = [
-    replace(var.ecs_task_definition_arn, "/:[0-9]+$/", ":*")
-  ]
+    resources = [
+      replace(var.ecs_task_definition_arn, "/:[0-9]+$/", ":*")
+    ]
 
-  condition {
-    test     = "ArnEquals"
-    variable = "ecs:cluster"
-    values   = [var.ecs_cluster_arn]
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = [var.ecs_cluster_arn]
+    }
   }
-}
 
   # Allow GitHub Actions to inspect migration tasks
   statement {

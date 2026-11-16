@@ -13,7 +13,7 @@ variable "database_name" {
 
 variable "database_username" {
   type      = string
-    sensitive = true
+  sensitive = true
 
 }
 
@@ -25,4 +25,15 @@ variable "security_group_id" {
 variable "tags" {
   type    = map(string)
   default = {}
+}
+
+variable "multi_az" {
+  description = "Enable Multi-AZ deployment"
+  type        = bool
+  default     = false
+}
+
+variable "instance_class" {
+  type    = string
+  default = "db.t4g.micro"
 }

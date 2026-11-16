@@ -68,3 +68,9 @@ variable "github_repository_id" {
   description = "GitHub repository ID"
   type        = string
 }
+
+
+variable "domain_name" {
+  description = "Domain name of the website"
+  type        = string
+}

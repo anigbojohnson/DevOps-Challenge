@@ -21,7 +21,8 @@ resource "aws_db_instance" "postgres" {
   engine         = "postgres"
   engine_version = "16"
 
-  instance_class = "db.t4g.micro"
+  instance_class = var.instance_class
+
 
   allocated_storage     = 20
   max_allocated_storage = 50
@@ -30,6 +31,8 @@ resource "aws_db_instance" "postgres" {
 
   db_name  = var.database_name
   username = var.database_username
+  multi_az = var.multi_az
+
 
   # AWS generates and manages the master password.
   manage_master_user_password = true
@@ -40,7 +43,6 @@ resource "aws_db_instance" "postgres" {
 
   publicly_accessible = false
 
-  multi_az                = false
   backup_retention_period = 1
 
   auto_minor_version_upgrade = true
