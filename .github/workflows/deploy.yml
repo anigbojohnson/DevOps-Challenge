@@ -15,9 +15,9 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: todo-app-dev
-  ECS_CLUSTER: todo-app-dev-cluster
-  ECS_SERVICE: todo-app-dev-service
+  ECR_REPOSITORY: todo-app-production
+  ECS_CLUSTER: todo-app-production-cluster
+  ECS_SERVICE: todo-app-production-service
 
 jobs:
 
