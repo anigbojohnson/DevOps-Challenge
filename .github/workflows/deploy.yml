@@ -228,7 +228,7 @@ jobs:
             --task-definition "$TASK_DEFINITION_ARN" \
             --launch-type FARGATE \
             --network-configuration file://network-config.json \
-            --overrides '{"containerOverrides":[{"name":"todo-app","command":["npm","migrate:up"]}]}' \
+            --overrides '{"containerOverrides":[{"name":"todo-app","command":["npm","run","migrate:up"]}]}' \
             --query 'tasks[0].taskArn' \
             --output text)
 
