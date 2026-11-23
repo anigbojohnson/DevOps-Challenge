@@ -4,6 +4,7 @@ const pool = require('../src/config/database');
 const {
     describe,
     it,
+    afterAll,
     before,
     after,
     beforeEach,
