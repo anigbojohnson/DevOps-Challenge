@@ -1,3 +1,15 @@
+# SNS topic for CloudWatch alarm notifications
+resource "aws_sns_topic" "cloudwatch_alarms" {
+  name = "${var.name}-cloudwatch-alarms"
+}
+
+# Email subscription
+resource "aws_sns_topic_subscription" "email" {
+  topic_arn = aws_sns_topic.cloudwatch_alarms.arn
+  protocol  = "email"
+  endpoint  = var.alarm_email
+}
+
 # ECS logs
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.name}"
@@ -22,6 +34,10 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
   period             = 300
   statistic          = "Average"
   threshold          = 80
+
+  alarm_actions = [
+   aws_sns_topic.cloudwatch_alarms.arn
+  ]
 
   dimensions = {
     ClusterName = var.cluster_name
@@ -49,6 +65,10 @@ resource "aws_cloudwatch_metric_alarm" "ecs_memory_high" {
     ServiceName = var.service_name
   }
 
+  alarm_actions = [
+    aws_sns_topic.cloudwatch_alarms.arn
+  ]
+
   treat_missing_data = "notBreaching"
 }
 
@@ -69,6 +89,9 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_high" {
     DBInstanceIdentifier = var.database_instance_identifier
   }
 
+  alarm_actions = [
+   aws_sns_topic.cloudwatch_alarms.arn
+  ]
   treat_missing_data = "notBreaching"
 }
 
@@ -89,6 +112,9 @@ resource "aws_cloudwatch_metric_alarm" "rds_storage_low" {
     DBInstanceIdentifier = var.database_instance_identifier
   }
 
+  alarm_actions = [
+   aws_sns_topic.cloudwatch_alarms.arn
+  ]
   treat_missing_data = "notBreaching"
 }
 
@@ -108,7 +134,10 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx_high" {
   dimensions = {
     LoadBalancer = var.load_balancer_arn_suffix
   }
-
+  
+  alarm_actions = [
+   aws_sns_topic.cloudwatch_alarms.arn
+  ]
   treat_missing_data = "notBreaching"
 }
 
@@ -289,3 +318,5 @@ resource "aws_cloudwatch_dashboard" "main" {
     ]
   })
 }
+
+

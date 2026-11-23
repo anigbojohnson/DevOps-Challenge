@@ -97,6 +97,7 @@ module "monitoring" {
 
   cluster_name = module.ecs.cluster_name
   service_name = module.ecs.service_name
+  alarm_email = var.alarm_email 
 
   database_instance_identifier = module.database.database_instance_identifier
 

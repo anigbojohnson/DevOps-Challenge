@@ -96,6 +96,8 @@ module "monitoring" {
 
   name       = local.name
   aws_region = var.aws_region
+  alarm_email = var.alarm_email 
+
 
   cluster_name = module.ecs.cluster_name
   service_name = module.ecs.service_name

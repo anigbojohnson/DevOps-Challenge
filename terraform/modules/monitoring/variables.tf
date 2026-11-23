@@ -26,3 +26,7 @@ variable "target_group_arn_suffix" {
   type = string
 }
 
+variable "alarm_email" {
+  description = "Email address for CloudWatch alarm notifications"
+  type        = string
+}

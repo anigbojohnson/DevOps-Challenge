@@ -73,3 +73,8 @@ variable "domain_name" {
   description = "Domain name of the website"
   type        = string
 }
+
+variable "alarm_email" {
+  description = "Email address for CloudWatch alarm notifications"
+  type        = string
+}

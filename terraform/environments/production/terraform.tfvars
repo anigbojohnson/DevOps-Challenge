@@ -13,5 +13,6 @@ github_branch     = "main"
 github_owner_id      = "64017426"
 github_repository_id = "1457886203"
 github_owner         = "anigbojohnson"
+alarm_email = "anigbojohnsona@gmail.com"
 
 domain_name = "mytodo.dpdns.org"

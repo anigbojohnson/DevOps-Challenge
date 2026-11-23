@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-    "start": "node src/server.js",
-    "test": "jest --runInBand",
-    "test:watch": "jest --watch",
-     "migrate": "node scripts/migrate.js"
-
+  "scripts": {
+    "migrate:create": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js create",
+    "migrate:up": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js up",
+    "migrate:down": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js down"
   },
   "keywords": [],
   "author": "",

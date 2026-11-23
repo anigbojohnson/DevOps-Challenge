@@ -209,6 +209,7 @@ jobs:
       - name: Run database migration
         env:
           ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ env.ECS_SERVICE }}
           TASK_DEFINITION_ARN: ${{ steps.register-task.outputs.task_definition_arn }}
         run: |
           # Get the ECS service network configuration
@@ -227,7 +228,7 @@ jobs:
             --task-definition "$TASK_DEFINITION_ARN" \
             --launch-type FARGATE \
             --network-configuration file://network-config.json \
-            --overrides '{"containerOverrides":[{"name":"todo-app","command":["node","src/scripts/migrate.js"]}]}' \
+            --overrides '{"containerOverrides":[{"name":"todo-app","command":["npm","migrate:up"]}]}' \
             --query 'tasks[0].taskArn' \
             --output text)
 
