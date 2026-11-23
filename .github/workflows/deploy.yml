@@ -72,7 +72,7 @@ jobs:
 
       - name: Run database migrations
         env:
-          DATABASE_URL: postgresql://postgres:charis123@localhost:5432/todo
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/todo_test
           NODE_ENV: test
         run: npm run migrate:up
 
