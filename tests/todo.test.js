@@ -2,8 +2,6 @@ const request = require('supertest');
 const app = require('../src/app');
 const pool = require('../src/config/database');
 
-const assert = require('node:assert');
-
 
 describe('Todo API Integration Tests', () => {
     let todoId;
