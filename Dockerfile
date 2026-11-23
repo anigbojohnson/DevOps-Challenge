@@ -13,6 +13,7 @@ COPY package*.json ./
 # Install production dependencies
 RUN npm ci --omit=dev
 
+
 # Download AWS RDS CA certificate bundle
 RUN curl --fail --silent --show-error --location \
     https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
