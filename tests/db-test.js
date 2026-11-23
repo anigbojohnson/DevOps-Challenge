@@ -12,5 +12,4 @@ async function testConnection() {
         await pool.end();
     }
 }
-
 testConnection();
