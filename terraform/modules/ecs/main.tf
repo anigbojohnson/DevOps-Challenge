@@ -133,13 +133,10 @@ resource "aws_ecs_task_definition" "app" {
       # Retrieve database credentials from Secrets Manager
       secrets = [
         {
-          name      = "DB_USER"
-          valueFrom = "${var.database_secret_arn}:username::"
-        },
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = "${var.database_secret_arn}:password::"
+          name      = "RDS_MASTER_SECRET"
+          valueFrom = var.database_secret_arn
         }
+
       ]
 
       logConfiguration = {

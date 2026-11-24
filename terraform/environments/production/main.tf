@@ -76,6 +76,7 @@ module "ecs" {
   subnet_ids        = module.networking.private_subnet_ids
   security_group_id = module.security.ecs_security_group_id
 
+
   container_port = var.container_port
 
   database_endpoint   = module.database.database_endpoint
