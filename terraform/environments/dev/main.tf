@@ -65,6 +65,7 @@ module "ecs" {
   name           = local.name
   aws_region     = var.aws_region
   repository_url = module.ecr.repository_url
+  environment = var.environment
 
   min_capacity = 1
   max_capacity = 3

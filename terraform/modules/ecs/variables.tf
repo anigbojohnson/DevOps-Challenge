@@ -74,3 +74,6 @@ variable "task_memory" {
   type = number
 }
 
+variable   environment {
+  
+}

@@ -64,6 +64,8 @@ module "ecs" {
   name           = local.name
   aws_region     = var.aws_region
   repository_url = module.ecr.repository_url
+  environment = var.environment
+
 
   log_group_name = module.monitoring.ecs_log_group_name
 

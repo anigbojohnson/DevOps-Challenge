@@ -126,7 +126,7 @@ resource "aws_ecs_task_definition" "app" {
         },
         {
           name  = "NODE_ENV"
-          value = "production"
+          value = var.environment
         }
       ]
 
