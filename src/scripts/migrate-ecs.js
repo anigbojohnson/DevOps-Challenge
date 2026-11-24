@@ -1,5 +1,11 @@
 const { spawnSync } = require('child_process');
 
+if (!process.env.RDS_MASTER_SECRET) {
+    throw new Error(
+        'RDS_MASTER_SECRET is missing. Check the ECS task definition secrets configuration.'
+    );
+}
+
 const credentials = JSON.parse(process.env.RDS_MASTER_SECRET);
 
 const databaseUrl = new URL('postgresql://localhost');
