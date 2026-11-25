@@ -2,6 +2,8 @@ const { spawnSync } = require('child_process');
 
 const credentials = JSON.parse(process.env.RDS_MASTER_SECRET);
 
+
+
 const databaseUrl = new URL('postgresql://localhost');
 
 databaseUrl.username = credentials.username;
@@ -9,6 +11,10 @@ databaseUrl.password = credentials.password;
 databaseUrl.hostname = process.env.DB_HOST;
 databaseUrl.port = process.env.DB_PORT || '5432';
 databaseUrl.pathname = `/${process.env.DB_NAME}`;
+
+// Enable TLS and verify the RDS server certificate.
+databaseUrl.searchParams.set('sslmode', 'verify-full');
+databaseUrl.searchParams.set('sslrootcert', process.env.DB_SSL_CA);
 
 process.env.DATABASE_URL = databaseUrl.toString();
 

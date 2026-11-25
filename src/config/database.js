@@ -6,7 +6,7 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     connectionTimeoutMillis: 10000,
 
-    ssl: process.env.NODE_ENV === 'production'
+    ssl: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'dev'
         ? {
             ca: fs.readFileSync(process.env.DB_SSL_CA, 'utf8'),
             rejectUnauthorized: true
