@@ -8,7 +8,8 @@
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "test": "jest",
-    "migrate:ecs": "node src/scripts/migrate-ecs.js"
+    "migrate:ecs": "node src/scripts/migrate-ecs.js",
+    "start": "node src/server.js"
   },
   "keywords": [],
   "author": "",
